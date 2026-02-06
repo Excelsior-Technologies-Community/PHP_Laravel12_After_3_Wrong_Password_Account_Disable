@@ -334,6 +334,23 @@ Security Logic:
 After 3 wrong attempts → account locked for 10 minutes using locked_until.
 
 
+The lock duration can be easily changed by modifying this line in the controller:
+
+```
+$account->locked_until = Carbon::now()->addMinutes(10);
+
+```
+
+For example:
+
+```
+30 minutes → addMinutes(30)
+
+1 hour → addHour()
+
+```
+
+
 
 ## STEP 6: Routes
 
