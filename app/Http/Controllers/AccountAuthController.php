@@ -7,6 +7,7 @@ use App\Models\Account;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use App\Models\LoginAttempt;
 
 class AccountAuthController extends Controller
 {
@@ -28,7 +29,7 @@ class AccountAuthController extends Controller
         Account::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Encrypt password
+            'password' => Hash::make($request->password),
         ]);
 
         return redirect('/login')->with('success', 'Account Created Successfully');
@@ -40,44 +41,73 @@ class AccountAuthController extends Controller
         return view('login');
     }
 
-    // 🔐 LOGIN LOGIC WITH TIME-BASED LOCK
+    // LOGIN LOGIC WITH LOG TRACKING
     public function loginPost(Request $request)
     {
         $account = Account::where('email', $request->email)->first();
 
-        // Email not found
+        // EMAIL NOT FOUND
         if (!$account) {
+
+            LoginAttempt::create([
+                'email' => $request->email,
+                'status' => 'failed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             return back()->with('error', 'Invalid Email');
         }
 
-        // Check if account is locked
+        // CHECK LOCK
         if ($account->locked_until && Carbon::now()->lessThan($account->locked_until)) {
+
+            $minutes = Carbon::now()->diffInMinutes($account->locked_until);
+
             return back()->with(
                 'error',
-                'Your account has been locked after 3 failed login attempts. Please try again after 10 minutes.'
+                "Your account has been locked after 3 failed login attempts for security reasons. Please try again after $minutes minutes."
             );
         }
 
-        // Wrong password
+        // WRONG PASSWORD
         if (!Hash::check($request->password, $account->password)) {
 
             $account->failed_attempts++;
 
-            // Lock account after 3 wrong attempts
+            $remaining = max(0, 3 - $account->failed_attempts);
+
+            LoginAttempt::create([
+                'email' => $request->email,
+                'status' => 'failed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             if ($account->failed_attempts >= 3) {
                 $account->locked_until = Carbon::now()->addMinutes(10);
-                $account->failed_attempts = 0; // Reset after lock
+                $account->failed_attempts = 0;
+                $account->save();
+
+                return back()->with('error', 'Account locked for 10 minutes!');
             }
 
             $account->save();
 
-            return back()->with('error', 'Wrong Password');
+            return back()->with('error', "Wrong Password. $remaining attempts left.");
         }
 
-        // Correct login → reset everything
+        //  SUCCESS LOGIN
         $account->failed_attempts = 0;
         $account->locked_until = null;
         $account->save();
+
+        LoginAttempt::create([
+            'email' => $request->email,
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         Session::put('account_id', $account->id);
 
@@ -99,5 +129,11 @@ class AccountAuthController extends Controller
     {
         Session::forget('account_id');
         return redirect('/login');
+    }
+
+    public function loginAttempts()
+    {
+        $logs = \App\Models\LoginAttempt::orderBy('id', 'asc')->get();
+        return view('logs', compact('logs'));
     }
 }
