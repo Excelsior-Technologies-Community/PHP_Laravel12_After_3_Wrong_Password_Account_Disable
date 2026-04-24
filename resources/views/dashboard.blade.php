@@ -16,7 +16,7 @@
         .card {
             background: #fff;
             padding: 40px;
-            width: 400px;
+            width: 420px;
             text-align: center;
             border-radius: 10px;
             box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
@@ -27,31 +27,51 @@
         }
 
         p {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 18px;
         }
 
-        a {
+        .btn {
             display: inline-block;
             padding: 10px 20px;
-            background: #ff5e62;
-            color: white;
+            margin: 8px;
             border-radius: 5px;
             text-decoration: none;
+            color: white;
+            font-weight: bold;
         }
 
-        a:hover {
+        .logout {
+            background: #ff5e62;
+        }
+
+        .logout:hover {
             background: #e04b4f;
+        }
+
+        .logs {
+            background: #007bff;
+        }
+
+        .logs:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
 
 <div class="card">
+
     <h2>Dashboard</h2>
     <p>Login Successful 🎉</p>
 
-    <a href="/logout">Logout</a>
+    <!--  NEW BUTTON -->
+    <a href="/login-attempts" class="btn logs">View Login Attempts</a>
+
+    <br>
+
+    <a href="/logout" class="btn logout">Logout</a>
+
 </div>
 
 </body>
