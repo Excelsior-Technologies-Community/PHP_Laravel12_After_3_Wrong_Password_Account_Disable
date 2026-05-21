@@ -1,78 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #ff9966, #ff5e62);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card {
-            background: #fff;
-            padding: 40px;
-            width: 420px;
-            text-align: center;
-            border-radius: 10px;
-            box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
-        }
-
-        h2 {
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 8px;
-            border-radius: 5px;
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-        }
-
-        .logout {
-            background: #ff5e62;
-        }
-
-        .logout:hover {
-            background: #e04b4f;
-        }
-
-        .logs {
-            background: #007bff;
-        }
-
-        .logs:hover {
-            background: #0056b3;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
 
-<div class="card">
+    <div class="bg-white p-10 w-full max-w-md text-center rounded-xl shadow-lg">
+        
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h2>
+        <p class="text-lg text-green-600 font-semibold mb-8">Login Successful 🎉</p>
 
-    <h2>Dashboard</h2>
-    <p>Login Successful 🎉</p>
+        <div class="flex flex-col space-y-4">
+            <a href="/login-attempts" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-sm">
+                View Login Attempts
+            </a>
 
-    <!--  NEW BUTTON -->
-    <a href="/login-attempts" class="btn logs">View Login Attempts</a>
+            <a href="/admin/blocked-accounts" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-sm">
+                Manage Blocked Accounts
+            </a>
 
-    <br>
+            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-sm">
+                Logout
+            </a>
+        </div>
 
-    <a href="/logout" class="btn logout">Logout</a>
-
-</div>
+    </div>
 
 </body>
 </html>

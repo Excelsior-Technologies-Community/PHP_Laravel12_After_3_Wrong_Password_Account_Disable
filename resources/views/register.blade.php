@@ -1,94 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #43cea2, #185a9d);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card {
-            background: #fff;
-            padding: 30px;
-            width: 350px;
-            border-radius: 10px;
-            box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            width: 100%;
-            background: #43cea2;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #35b28d;
-        }
-
-        .success {
-            color: green;
-            text-align: center;
-        }
-
-        .link {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        a {
-            text-decoration: none;
-            color: #185a9d;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Secure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create Account</h2>
+        
+        @if(session('success'))
+            <div class="bg-green-100 text-green-700 px-4 py-3 rounded mb-4 text-center text-sm font-medium">
+                {{ session('success') }}
+            </div>
+        @endif
 
-<div class="card">
-    <h2>Register</h2>
+        <form method="POST" action="/register">
+            @csrf
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-    @if(session('success'))
-        <p class="success">{{ session('success') }}</p>
-    @endif
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                @error('email')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-    <form method="POST" action="/register">
-        @csrf
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-1">Password</label>
+                <input type="password" name="password" placeholder="Create a password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                @error('password')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-        <input type="text" name="name" placeholder="Full Name" required>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition">
+                Register
+            </button>
+        </form>
 
-        <input type="email" name="email" placeholder="Email" required>
-
-        <input type="password" name="password" placeholder="Password" required>
-
-        <button type="submit">Register</button>
-    </form>
-
-    <div class="link">
-        <a href="/login">Already have account?</a>
+        <div class="mt-4 text-center">
+            <a href="/login" class="text-blue-600 hover:underline text-sm font-medium">Already have an account? Login</a>
+        </div>
     </div>
-</div>
-
 </body>
 </html>

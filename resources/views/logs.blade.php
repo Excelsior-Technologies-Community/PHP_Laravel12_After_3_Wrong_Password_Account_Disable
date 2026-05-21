@@ -1,141 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Attempts Log</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .container {
-            width: 90%;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
-        }
-
-        th {
-            background: #343a40;
-            color: white;
-        }
-
-        tr:hover {
-            background: #f1f1f1;
-        }
-
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-
-        .failed {
-            color: red;
-            font-weight: bold;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-        }
-
-        .badge-success {
-            background: #28a745;
-        }
-
-        .badge-failed {
-            background: #dc3545;
-        }
-
-        .top-bar {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-
-        .top-bar a {
-            text-decoration: none;
-            background: #007bff;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-        }
-
-        .top-bar a:hover {
-            background: #0056b3;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 p-6 md:p-10">
 
-<body>
+    <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-md">
+        
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">🔐 Login Attempt Logs</h2>
 
-<div class="container">
+        <div class="text-right mb-6">
+            <a href="/dashboard" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-sm">
+                ⬅ Back to Dashboard
+            </a>
+        </div>
 
-    <h2>🔐 Login Attempt Logs</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-800 text-white">
+                        <th class="p-4 border border-gray-700 text-center font-semibold">ID</th>
+                        <th class="p-4 border border-gray-700 text-center font-semibold">Email</th>
+                        <th class="p-4 border border-gray-700 text-center font-semibold">Status</th>
+                        <th class="p-4 border border-gray-700 text-center font-semibold">IP Address</th>
+                        <th class="p-4 border border-gray-700 text-center font-semibold">Device Info</th>
+                        <th class="p-4 border border-gray-700 text-center font-semibold">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($logs as $log)
+                        <tr class="hover:bg-gray-50 transition duration-150">
+                            <td class="p-4 border text-center text-gray-700">{{ $log->id }}</td>
+                            <td class="p-4 border text-center text-gray-700 font-medium">{{ $log->email }}</td>
+                            <td class="p-4 border text-center">
+                                @if($log->status == 'success')
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm">Success</span>
+                                @else
+                                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm">Failed</span>
+                                @endif
+                            </td>
+                            <td class="p-4 border text-center text-gray-600 text-sm">{{ $log->ip_address }}</td>
+                            <td class="p-4 border max-w-xs break-words text-sm text-gray-500 leading-relaxed">
+                                {{ $log->user_agent }}
+                            </td>
+                            <td class="p-4 border text-center text-sm text-gray-600 font-medium">{{ $log->created_at->format('d M Y, h:i A') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-    <div class="top-bar">
-        <a href="/dashboard">⬅ Back to Dashboard</a>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>IP Address</th>
-                <th>Device Info</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach($logs as $log)
-                <tr>
-                    <td>{{ $log->id }}</td>
-                    <td>{{ $log->email }}</td>
-
-                    <td>
-                        @if($log->status == 'success')
-                            <span class="badge badge-success">Success</span>
-                        @else
-                            <span class="badge badge-failed">Failed</span>
-                        @endif
-                    </td>
-
-                    <td>{{ $log->ip_address }}</td>
-                    <td style="max-width:200px; word-break:break-word;">
-                        {{ $log->user_agent }}
-                    </td>
-
-                    <td>{{ $log->created_at }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-</div>
 
 </body>
 </html>

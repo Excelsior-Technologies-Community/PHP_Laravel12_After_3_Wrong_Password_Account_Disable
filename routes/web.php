@@ -18,3 +18,6 @@ Route::get('/dashboard', [AccountAuthController::class, 'dashboard']);
 Route::get('/logout', [AccountAuthController::class, 'logout']);
 
 Route::get('/login-attempts', [AccountAuthController::class, 'loginAttempts']);
+
+Route::get('/admin/blocked-accounts', [AccountAuthController::class, 'blockedAccounts'])->name('admin.blocked');
+Route::post('/admin/unblock/{id}', [AccountAuthController::class, 'unblockAccount'])->name('admin.unblock');
