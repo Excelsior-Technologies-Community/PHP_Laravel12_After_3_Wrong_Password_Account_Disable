@@ -11,13 +11,11 @@ use App\Models\LoginAttempt;
 
 class AccountAuthController extends Controller
 {
-    // Show Register Page
     public function register()
     {
         return view('register');
     }
 
-    // Register Logic
     public function registerPost(Request $request)
     {
         $request->validate([
@@ -35,20 +33,16 @@ class AccountAuthController extends Controller
         return redirect('/login')->with('success', 'Account Created Successfully');
     }
 
-    // Show Login Page
     public function login()
     {
         return view('login');
     }
 
-    // LOGIN LOGIC WITH LOG TRACKING
     public function loginPost(Request $request)
     {
         $account = Account::where('email', $request->email)->first();
 
-        // EMAIL NOT FOUND
         if (!$account) {
-
             LoginAttempt::create([
                 'email' => $request->email,
                 'status' => 'failed',
@@ -56,25 +50,22 @@ class AccountAuthController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
+            if ($request->ajax()) return response()->json(['status' => 'error', 'message' => 'Invalid Email']);
             return back()->with('error', 'Invalid Email');
         }
 
-        // CHECK LOCK
         if ($account->locked_until && Carbon::now()->lessThan($account->locked_until)) {
-
             $minutes = Carbon::now()->diffInMinutes($account->locked_until);
-
-            return back()->with(
-                'error',
-                "Your account has been locked after 3 failed login attempts for security reasons. Please try again after $minutes minutes."
-            );
+            $minutes = $minutes == 0 ? 1 : $minutes;
+            
+            $msg = "Your account has been locked. Please try again after $minutes minute(s).";
+            
+            if ($request->ajax()) return response()->json(['status' => 'error', 'message' => $msg]);
+            return back()->with('error', $msg);
         }
 
-        // WRONG PASSWORD
         if (!Hash::check($request->password, $account->password)) {
-
             $account->failed_attempts++;
-
             $remaining = max(0, 3 - $account->failed_attempts);
 
             LoginAttempt::create([
@@ -85,19 +76,24 @@ class AccountAuthController extends Controller
             ]);
 
             if ($account->failed_attempts >= 3) {
-                $account->locked_until = Carbon::now()->addMinutes(10);
+              
+                $account->locked_until = Carbon::now()->addMinutes(1);
                 $account->failed_attempts = 0;
                 $account->save();
-
-                return back()->with('error', 'Account locked for 10 minutes!');
+                
+              
+                $msg = 'Account locked for 1 minute due to multiple failed attempts!';
+                if ($request->ajax()) return response()->json(['status' => 'error', 'message' => $msg]);
+                return back()->with('error', $msg);
             }
 
             $account->save();
-
-            return back()->with('error', "Wrong Password. $remaining attempts left.");
+            $msg = "Wrong Password. $remaining attempts left.";
+            
+            if ($request->ajax()) return response()->json(['status' => 'warning', 'message' => $msg]);
+            return back()->with('error', $msg);
         }
 
-        //  SUCCESS LOGIN
         $account->failed_attempts = 0;
         $account->locked_until = null;
         $account->save();
@@ -111,10 +107,17 @@ class AccountAuthController extends Controller
 
         Session::put('account_id', $account->id);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success', 
+                'message' => 'Login Successful! Redirecting...',
+                'redirect' => url('/dashboard')
+            ]);
+        }
+
         return redirect('/dashboard');
     }
 
-    // Dashboard
     public function dashboard()
     {
         if (!Session::has('account_id')) {
@@ -124,7 +127,6 @@ class AccountAuthController extends Controller
         return view('dashboard');
     }
 
-    // Logout
     public function logout()
     {
         Session::forget('account_id');
@@ -135,5 +137,21 @@ class AccountAuthController extends Controller
     {
         $logs = \App\Models\LoginAttempt::orderBy('id', 'asc')->get();
         return view('logs', compact('logs'));
+    }
+
+    public function blockedAccounts()
+    {
+        $blockedAccounts = Account::whereNotNull('locked_until')->where('locked_until', '>', Carbon::now())->get();
+        return view('admin_blocked_accounts', compact('blockedAccounts'));
+    }
+
+    public function unblockAccount($id)
+    {
+        $account = Account::findOrFail($id);
+        $account->failed_attempts = 0;
+        $account->locked_until = null;
+        $account->save();
+
+        return back()->with('success', 'Account unblocked successfully');
     }
 }
