@@ -1,4 +1,5 @@
 <?php
+// app/Models/Account.php
 
 namespace App\Models;
 
@@ -9,10 +10,8 @@ class Account extends Model
 {
     use HasFactory;
 
-    // Table name
     protected $table = 'accounts';
 
-    // Mass assignable fields
     protected $fillable = [
         'name',
         'email',
@@ -20,4 +19,22 @@ class Account extends Model
         'failed_attempts',
         'locked_until',
     ];
+
+    protected $casts = [
+        'locked_until' => 'datetime',
+    ];
+
+    public function isLocked()
+    {
+        return $this->locked_until && now()->lessThan($this->locked_until);
+    }
+
+    public function getRemainingLockMinutes()
+    {
+        if (!$this->isLocked()) {
+            return 0;
+        }
+        
+        return now()->diffInMinutes($this->locked_until, false);
+    }
 }
